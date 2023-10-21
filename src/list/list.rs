@@ -4,7 +4,7 @@ pub struct List<T> {
 }
 
 impl <T> List<T> {
-    pub fn new<T>(cap: i32) -> Self {
+    pub fn new(cap: i32) -> Self {
         List { array: Vec::with_capacity(cap as usize), cap: cap as usize}
     }
     pub fn append(&mut self, t: T) {
