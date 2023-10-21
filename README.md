@@ -15,8 +15,8 @@ Todo
 2. Stack
 3. Queue
 4. Linked List
-   - singly linked list - insert, delete, search
-   - doubly linked list - splice, insert, delete, search
+   - singly linked List - insert, delete, search
+   - doubly linked List - splice, insert, delete, search
 5. hash table
    - open addressing, chaining
 6. heap
