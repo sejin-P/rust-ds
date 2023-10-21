@@ -1,26 +1,30 @@
 pub struct List<T> {
-    array: Vec<T>,
+    array: Vec<Option<T>>,
     cap: usize,
+    len: usize,
 }
 
 impl <T> List<T> {
-    pub fn new(cap: i32) -> Self {
-        List { array: Vec::with_capacity(cap as usize), cap: cap as usize}
+    pub fn new(cap: usize) -> Self {
+        List { array: vec![None; cap], cap, len: 0 }
     }
     pub fn append(&mut self, t: T) {
-        let l = self.array.len();
-        if l == self.cap {
-            let new_vec = Vec::with_capacity(2*self.cap);
-            let mut i = 0;
-            while let Some(t) = self.array.pop() {
-                new_vec[l-i-1] = t;
-                i += 1;
-            }
-            self = &mut List { array: new_vec, cap: 2 * self.cap };
-            return
+        if self.array.len() == self.cap {
+            self.double_cap();
         }
 
-        self.array[l] = t;
+        self.array[self.array.len()] = t;
+        self.len += 1;
         return
+    }
+
+    fn double_cap(&mut self) {
+        let mut new_vec = vec![None, 2*self.cap];
+        for i in 0..self.len {
+            new_vec[i] = self.array[i].take();
+        }
+
+        self.array = new_vec;
+        self.cap += 1;
     }
 }
