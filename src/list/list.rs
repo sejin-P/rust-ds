@@ -28,9 +28,9 @@ impl <T> List<T> {
         return
     }
 
-    pub fn get(&mut self, i: usize) -> Option<T> {
+    pub fn get(&mut self, i: usize) -> Option<&T> {
         if i < self.len {
-            std::mem::replace(&mut self.array[i], None)
+            self.array[i].as_ref()
         } else {
             None
         }
@@ -63,7 +63,7 @@ mod tests {
         let mut li = List::new(1);
         li.append(1);
         let a = li.get(0).expect("");
-        assert_eq!(1, a);
+        assert_eq!(1, *a);
     }
 
     fn append_exceeded_cap() {
@@ -71,7 +71,7 @@ mod tests {
         li.append(1);
         li.append(2);
         let a = li.get(1).expect("");
-        assert_eq!(2, a);
+        assert_eq!(2, *a);
     }
 
     fn append_any_struct() {
