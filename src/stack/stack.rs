@@ -8,9 +8,8 @@ pub struct Stack<T> {
 
 impl <T> Stack<T> {
     pub fn new() -> Self {
-        let mut li: Vec<T> = vec![];
         Stack {
-            li
+            li: Vec::new(),
         }
     }
 
@@ -53,7 +52,7 @@ impl Error for StackErr {}
 
 #[cfg(test)]
 mod tests {
-    use crate::stack::stack::Stack;
+    use super::Stack;
 
     #[test]
     fn push_and_pop() {
