@@ -37,6 +37,7 @@ impl <T> Stack<T> {
 }
 
 #[derive(Debug)]
+#[derive(PartialEq)]
 enum StackErr {
     IndexOutErr()
 }
@@ -52,7 +53,7 @@ impl Error for StackErr {}
 
 #[cfg(test)]
 mod tests {
-    use super::Stack;
+    use super::{Stack, StackErr};
 
     #[test]
     fn push_and_pop() {
@@ -60,5 +61,22 @@ mod tests {
         st.push(1);
         let v = st.pop().unwrap();
         assert_eq!(1, v);
+        assert_eq!(0, st.len());
+    }
+
+    #[test]
+    fn push_and_top() {
+        let mut st = Stack::new();
+        st.push(1);
+        let v = *st.top().unwrap();
+        assert_eq!(1, v);
+        assert_eq!(1, st.len());
+    }
+
+    #[test]
+    fn empty_pop() {
+        let mut st: Stack<i32> = Stack::new();
+        let empty = st.pop().unwrap_err();
+        assert_eq!(StackErr::IndexOutErr(), empty);
     }
 }
