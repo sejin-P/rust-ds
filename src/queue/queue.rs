@@ -1,6 +1,5 @@
 use std::error::Error;
 use std::fmt::{Debug, Display, Formatter};
-use crate::queue::queue::QueueErr::EmptyErr;
 
 pub struct Queue<T> {
     li: Vec<T>,
