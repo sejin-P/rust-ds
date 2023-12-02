@@ -24,21 +24,25 @@ impl <T> LinkedList<T> {
     }
 
     pub fn insert(&mut self, val: T) {
-        if self.head.is_none() {
-            let node_ptr = Rc::new(RefCell::new(Node{val, next: None}));
-            self.head = Some(Rc::clone(&node_ptr));
-            self.tail = Some(Rc::clone(&node_ptr));
-            self.len += 1;
-            return
+        let new_node = Rc::new(RefCell::new(Node{val, next: None}));
+
+        match self.tail.take() {
+            Some(mut old_tail) => {
+                let mut binding = old_tail.clone();
+                let borrow_tail = binding.borrow_mut();
+                unsafe {
+                    (*borrow_tail.as_ptr()).next = Some(Rc::clone(&new_node));
+                }
+                self.tail = Some(new_node);
+            },
+            None => {
+                // If the list is empty, new node becomes both head and tail.
+                self.head = Some(Rc::clone(&new_node));
+                self.tail = Some(new_node);
+            }
         }
 
-        let node_ptr = Rc::new(RefCell::new(Node{val, next: None}));
-        let mut binding = self.tail.clone().unwrap();
-        let borrow_tail = binding.borrow_mut();
-        unsafe {
-            (*borrow_tail.as_ptr()).next = Some(Rc::clone(&node_ptr));
-        }
-        self.tail = Some(Rc::clone(&node_ptr));
+        self.len += 1;
     }
 
     pub fn len(&self) -> usize {
@@ -59,8 +63,9 @@ mod tests {
         let mut l = LinkedList::new();
         l.insert(1);
         l.insert(2);
+        l.insert(3);
 
         let t = l.tail();
-        assert_eq!(2, t.unwrap().borrow().val)
+        assert_eq!(3, t.unwrap().borrow().val)
     }
 }
