@@ -1,5 +1,5 @@
 use std::borrow::BorrowMut;
-use std::cell::{Ref, RefCell};
+use std::cell::{Ref, RefCell, RefMut};
 use std::mem;
 use std::ops::Deref;
 use std::rc::Rc;
@@ -63,6 +63,39 @@ impl <T> LinkedList<T> {
         })
     }
 
+    pub fn pop_back(&mut self) -> Option<T> {
+        let mut prev = None;
+        let mut n = self.head.clone();
+        while !n.is_none() {
+            let next = n.clone().unwrap().borrow().next.clone();
+            if next.is_none() {
+                break
+            }
+
+            prev = n.clone();
+            n = next;
+        }
+
+        match prev.take() {
+            Some(mut old_prev) => {
+                unsafe {
+                    (*old_prev.clone().as_ptr()).next = None;
+                }
+            }
+            None => {
+                self.head = None
+            }
+        }
+
+        n.take().map(|last_node| {
+            Rc::try_unwrap(last_node)
+                .ok()
+                .expect("There are multiple owners of the node")
+                .into_inner()
+                .val
+        })
+    }
+
     pub fn len(&self) -> usize {
         self.len
     }
@@ -113,5 +146,16 @@ mod tests {
         assert_eq!(1, p.unwrap());
         let p = l.pop_front();
         assert_eq!(None, p);
+    }
+
+    #[test]
+    fn pop_back() {
+        let mut l = LinkedList::new();
+        l.push_front(1);
+        l.push_front(2);
+        let p = l.pop_back();
+        assert_eq!(1, p.unwrap());
+        let p = l.pop_back();
+        assert_eq!(2, p.unwrap());
     }
 }
