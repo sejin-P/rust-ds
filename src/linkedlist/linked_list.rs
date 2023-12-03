@@ -23,7 +23,7 @@ impl <T> LinkedList<T> {
         }
     }
 
-    pub fn insert(&mut self, val: T) {
+    pub fn push_back(&mut self, val: T) {
         let new_node = Rc::new(RefCell::new(Node{val, next: None}));
 
         match self.tail.take() {
@@ -45,6 +45,12 @@ impl <T> LinkedList<T> {
         self.len += 1;
     }
 
+    pub fn push_front(&mut self, val: T) {
+        let new_node = Rc::new(RefCell::new(Node{val, next: self.head.clone()}));
+        self.head = Some(new_node);
+        self.len += 1;
+    }
+
     pub fn len(&self) -> usize {
         self.len
     }
@@ -61,9 +67,9 @@ mod tests {
     #[test]
     fn insert_tail() {
         let mut l = LinkedList::new();
-        l.insert(1);
-        l.insert(2);
-        l.insert(3);
+        l.push_back(1);
+        l.push_back(2);
+        l.push_back(3);
 
         let t = l.tail();
         assert_eq!(3, t.unwrap().borrow().val)
