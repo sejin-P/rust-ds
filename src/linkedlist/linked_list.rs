@@ -1,5 +1,6 @@
 use std::borrow::BorrowMut;
 use std::cell::{Ref, RefCell};
+use std::mem;
 use std::ops::Deref;
 use std::rc::Rc;
 
@@ -28,10 +29,8 @@ impl <T> LinkedList<T> {
 
         match self.tail.take() {
             Some(mut old_tail) => {
-                let mut binding = old_tail.clone();
-                let borrow_tail = binding.borrow_mut();
                 unsafe {
-                    (*borrow_tail.as_ptr()).next = Some(Rc::clone(&new_node));
+                    (*old_tail.clone().as_ptr()).next = Some(Rc::clone(&new_node));
                 }
                 self.tail = Some(new_node);
             },
@@ -49,6 +48,19 @@ impl <T> LinkedList<T> {
         let new_node = Rc::new(RefCell::new(Node{val, next: self.head.clone()}));
         self.head = Some(new_node);
         self.len += 1;
+    }
+
+    pub fn pop_front(&mut self) -> Option<T> {
+        self.head.take().map(|mut old_head| unsafe {
+            // below cloned old_head is safely dropped, so we can call try_unwrap
+            let next = mem::replace(&mut (*old_head.clone().as_ptr()).next, None);
+            self.head = next;
+            return Rc::try_unwrap(old_head)
+                .ok()
+                .expect("There are multiple owners of the node")
+                .into_inner()
+                .val
+        })
     }
 
     pub fn len(&self) -> usize {
@@ -75,7 +87,8 @@ mod tests {
         l.push_back(3);
 
         let t = l.tail();
-        assert_eq!(3, t.unwrap().borrow().val)
+        assert_eq!(3, t.unwrap().borrow().val);
+        assert_eq!(1, l.head().unwrap().borrow().val);
     }
 
     #[test]
@@ -87,5 +100,18 @@ mod tests {
         let h = l.head();
         assert_eq!(3, h.clone().unwrap().borrow().val);
         assert_eq!(2, h.clone().unwrap().borrow().next.clone().unwrap().borrow().val);
+    }
+
+    #[test]
+    fn pop_front() {
+        let mut l = LinkedList::new();
+        l.push_front(1);
+        l.push_front(2);
+        let p = l.pop_front();
+        assert_eq!(2, p.unwrap());
+        let p = l.pop_front();
+        assert_eq!(1, p.unwrap());
+        let p = l.pop_front();
+        assert_eq!(None, p);
     }
 }
