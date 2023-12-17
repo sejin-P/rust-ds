@@ -1,10 +1,14 @@
-pub struct LinearProbeMap<V> {
+use std::collections::hash_map::DefaultHasher;
+use std::hash::{Hash, Hasher};
+
+pub struct LinearProbeMap<K: Hash + PartialEq, V> {
+    hasher: Box<dyn Hasher>,
     m: usize,
-    k: Vec<Option<i32>>,
+    k: Vec<Option<K>>,
     v: Vec<Option<V>>,
 }
 
-impl <V> LinearProbeMap<V> {
+impl <K: Hash + PartialEq, V> LinearProbeMap<K, V> {
     pub fn new() -> Self {
         let m = 4;
         let mut k_arr = unsafe {
@@ -25,20 +29,23 @@ impl <V> LinearProbeMap<V> {
         }
 
         return LinearProbeMap{
+            hasher: Box::new(DefaultHasher::new()),
             m,
             k: k_arr,
             v: v_arr,
         }
     }
 
-    pub fn h(&self, k: i32) -> usize {
-        return (k as usize)%self.m
+    pub fn h(&mut self, k: &K) -> usize {
+        k.hash(&mut self.hasher);
+
+        return (self.hasher.finish() as usize)%self.m
     }
 
-    pub fn find_slot(&self, k: i32) -> Option<usize> {
+    pub fn find_slot(&mut self, k: &K) -> Option<usize> {
         let mut h = self.h(k);
         while !self.k[h].is_none() {
-            if self.k[h].unwrap() == k {
+            if self.k[h].as_ref().unwrap() == k {
                 return Some(h);
             } else {
                 h += 1;
@@ -50,28 +57,28 @@ impl <V> LinearProbeMap<V> {
 
     fn double_cap(&mut self) {
         self.m *= 2;
-        self.k.resize(self.m, None);
+        self.k.resize_with(self.m, {|| None});
         self.v.resize_with(self.m, {|| None});
     }
 
-    pub fn get(&self, k: i32) -> Option<&V> {
-        match self.find_slot(k) {
+    pub fn get(&mut self, k: K) -> Option<&V> {
+        match self.find_slot(&k) {
             Some(slot) => return self.v[slot].as_ref(),
             None => None
         }
     }
 
-    pub fn set(&mut self, k: i32, v: V) {
-        let mut h = self.h(k);
+    pub fn set(&mut self, k: K, v: V) {
+        let mut h = self.h(&k);
         let mut iter = 0;
         while self.k[h].is_some() {
             if iter == self.m {
                 self.double_cap();
-                h = self.h(k);
+                h = self.h(&k);
                 iter = 0;
                 continue
             }
-            if self.k[h].unwrap() == k {
+            if self.k[h].as_ref().unwrap() == &k {
                 self.k[h] = Some(k);
                 self.v[h] = Some(v);
                 return;
