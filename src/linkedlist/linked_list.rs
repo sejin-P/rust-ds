@@ -1,5 +1,5 @@
 use std::borrow::BorrowMut;
-use std::cell::{Ref, RefCell, RefMut};
+use std::cell::{RefCell};
 use std::mem;
 use std::ops::Deref;
 use std::rc::Rc;
@@ -9,13 +9,13 @@ pub struct Node<T> {
     next: Option<Rc<RefCell<Node<T>>>>,
 }
 
-pub struct LinkedList<T> {
+pub struct LinkedList<T: PartialEq> {
     head: Option<Rc<RefCell<Node<T>>>>,
     tail: Option<Rc<RefCell<Node<T>>>>,
     len: usize,
 }
 
-impl <T> LinkedList<T> {
+impl <T: PartialEq> LinkedList<T> {
     pub fn new() -> Self {
         LinkedList {
             head: None,
@@ -26,12 +26,11 @@ impl <T> LinkedList<T> {
 
     pub fn push_back(&mut self, val: T) {
         let new_node = Rc::new(RefCell::new(Node{val, next: None}));
+        let new_tail = Some(new_node.clone());
 
         match self.tail.take() {
-            Some(mut old_tail) => {
-                unsafe {
-                    (*old_tail.clone().as_ptr()).next = Some(Rc::clone(&new_node));
-                }
+            Some(old_tail) => {
+                RefCell::borrow_mut(&old_tail).next = new_tail;
                 self.tail = Some(new_node);
             },
             None => {
@@ -51,9 +50,9 @@ impl <T> LinkedList<T> {
     }
 
     pub fn pop_front(&mut self) -> Option<T> {
-        self.head.take().map(|mut old_head| unsafe {
+        self.head.take().map(|mut old_head| {
             // below cloned old_head is safely dropped, so we can call try_unwrap
-            let next = mem::replace(&mut (*old_head.clone().as_ptr()).next, None);
+            let next = mem::replace(&mut (RefCell::borrow_mut(&old_head)).next, None);
             self.head = next;
             return Rc::try_unwrap(old_head)
                 .ok()
@@ -77,10 +76,8 @@ impl <T> LinkedList<T> {
         }
 
         match prev.take() {
-            Some(mut old_prev) => {
-                unsafe {
-                    (*old_prev.clone().as_ptr()).next = None;
-                }
+            Some(old_prev) => {
+                RefCell::borrow_mut(&old_prev).next = None;
             }
             None => {
                 self.head = None
@@ -94,6 +91,17 @@ impl <T> LinkedList<T> {
                 .into_inner()
                 .val
         })
+    }
+
+    pub fn search(&self, val: T) -> Option<Rc<RefCell<Node<T>>>> {
+        let mut n = self.head.clone();
+        while !n.is_none() {
+            if n.clone().unwrap().borrow().val == val {
+                return n;
+            }
+        }
+
+        return None;
     }
 
     pub fn len(&self) -> usize {
@@ -157,5 +165,14 @@ mod tests {
         assert_eq!(1, p.unwrap());
         let p = l.pop_back();
         assert_eq!(2, p.unwrap());
+    }
+
+    #[test]
+    fn search() {
+        let mut l = LinkedList::new();
+        l.push_front(1);
+        l.push_front(2);
+        let n = l.search(2);
+        assert_eq!(2, n.unwrap().borrow().val)
     }
 }
