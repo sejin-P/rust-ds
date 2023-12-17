@@ -50,10 +50,10 @@ impl <T: PartialEq> LinkedList<T> {
     }
 
     pub fn pop_front(&mut self) -> Option<T> {
-        self.head.take().map(|mut old_head| {
-            // below cloned old_head is safely dropped, so we can call try_unwrap
+        self.head.take().map(|old_head| {
             let next = mem::replace(&mut (RefCell::borrow_mut(&old_head)).next, None);
             self.head = next;
+            // below cloned old_head is safely dropped, so we can call try_unwrap
             return Rc::try_unwrap(old_head)
                 .ok()
                 .expect("There are multiple owners of the node")
