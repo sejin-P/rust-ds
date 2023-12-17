@@ -5,6 +5,7 @@ pub mod linkedlist;
 pub mod list;
 mod stack;
 mod queue;
+mod hashmap;
 
 struct SomeStruct<T> {
     val: T,
