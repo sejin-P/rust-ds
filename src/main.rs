@@ -1,5 +1,7 @@
 use std::cell::RefCell;
+use std::hash::{Hash, Hasher};
 use std::rc::Rc;
+use fnv::FnvHasher;
 
 pub mod linkedlist;
 pub mod list;
@@ -18,4 +20,12 @@ fn main() {
     c.val = 10; // Modify the val field of SomeStruct
 
     println!("Modified value: {}", c.val); // Prints: Modified value: 10
+
+    let mut h = FnvHasher::default();
+    let mut a = 1;
+    a.hash(&mut h);
+    println!("{}", h.finish());
+    let mut b = 1;
+    b.hash(&mut h);
+    println!("{}", h.finish());
 }
