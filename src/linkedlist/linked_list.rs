@@ -45,14 +45,19 @@ impl <T: PartialEq> LinkedList<T> {
 
     pub fn push_front(&mut self, val: T) {
         let new_node = Rc::new(RefCell::new(Node{val, next: self.head.clone()}));
+        if self.head.clone().is_none() {
+            self.tail = Some(new_node.clone())
+        }
         self.head = Some(new_node);
         self.len += 1;
+
     }
 
     pub fn pop_front(&mut self) -> Option<T> {
         self.head.take().map(|old_head| {
             let next = mem::replace(&mut (RefCell::borrow_mut(&old_head)).next, None);
             self.head = next;
+            self.len -= 1;
             // below cloned old_head is safely dropped, so we can call try_unwrap
             return Rc::try_unwrap(old_head)
                 .ok()
@@ -84,6 +89,7 @@ impl <T: PartialEq> LinkedList<T> {
             }
         }
 
+        self.len -= 1;
         n.take().map(|last_node| {
             Rc::try_unwrap(last_node)
                 .ok()
@@ -99,9 +105,37 @@ impl <T: PartialEq> LinkedList<T> {
             if n.clone().unwrap().borrow().val == val {
                 return n;
             }
+            n = n.clone().unwrap().borrow().next.clone();
         }
 
         return None;
+    }
+
+    pub fn remove(&mut self, val: T) {
+        let mut prev: Option<Rc<RefCell<Node<T>>>> = None;
+        let mut n = self.head.clone();
+        while !n.is_none() {
+            if n.clone().unwrap().borrow().val == val {
+                self.len -= 1;
+                if prev.is_none() && n.clone().unwrap().borrow().next.is_none() {
+                    self.head = None;
+                    self.tail = None;
+                    return
+                }
+                if prev.is_none() {
+                    self.head = n.unwrap().borrow().next.clone();
+                    return
+                }
+                if n.clone().unwrap().borrow().next.is_none() {
+                    self.tail = prev.clone()
+                }
+                RefCell::borrow_mut(&(prev.unwrap())).next = n.unwrap().borrow().next.clone();
+
+                return
+            }
+            prev = n.clone();
+            n = n.clone().unwrap().borrow().next.clone();
+        }
     }
 
     pub fn len(&self) -> usize {
@@ -174,5 +208,16 @@ mod tests {
         l.push_front(2);
         let n = l.search(2);
         assert_eq!(2, n.unwrap().borrow().val)
+    }
+
+    #[test]
+    fn remove() {
+        let mut l = LinkedList::new();
+        l.push_front(1);
+        l.push_front(2);
+        l.push_front(3);
+        l.remove(1);
+        let n = l.search(1);
+        assert!(n.is_none());
     }
 }
