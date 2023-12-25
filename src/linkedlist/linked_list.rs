@@ -5,8 +5,8 @@ use std::ops::Deref;
 use std::rc::Rc;
 
 pub struct Node<T> {
-    val: T,
-    next: Option<Rc<RefCell<Node<T>>>>,
+    pub val: T,
+    pub next: Option<Rc<RefCell<Node<T>>>>,
 }
 
 pub struct LinkedList<T: PartialEq> {
@@ -148,6 +148,7 @@ impl <T: PartialEq> LinkedList<T> {
     pub fn head(&self) -> Option<Rc<RefCell<Node<T>>>> {
         self.head.clone()
     }
+    pub fn decr_len(&mut self) { self.len -= 1}
 }
 
 #[cfg(test)]
