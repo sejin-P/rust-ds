@@ -3,7 +3,7 @@
 ## Collision Resolution Method
 
  - Open addressing
-   - If hashmap is maintained with total length is greater than the 2 times of number of keys, then cluster average size is O(1) 
+   - If hashmap is maintained with total length is greater than the n(n can be float) times of number of keys, then cluster average size is O(1) 
      - Linear probing
        - if h(x) collides, try h(x) + 1, h(x) + 2, ...
        - The clustered keys called cluster
