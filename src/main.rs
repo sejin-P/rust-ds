@@ -8,6 +8,7 @@ pub mod list;
 mod stack;
 mod queue;
 mod hashmap;
+mod heap;
 
 struct SomeStruct<T> {
     val: T,
