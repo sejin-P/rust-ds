@@ -8,14 +8,7 @@ impl <T> List<T> {
     // Specifically, when using the vec![value; count] syntax,
     // the vec! macro tries to clone value count times, even if the value is something like None.
     pub fn new(cap: usize) -> Self {
-        let mut arr: Vec<Option<T>> = unsafe {
-            let mut v = Vec::with_capacity(cap);
-            v.set_len(cap);
-            v
-        };
-        for i in 0..cap {
-            arr[i] = None;
-        }
+        let arr = (0..cap).map(|_| None).collect::<Vec<_>>();
         List { array: arr, cap, len: 0 }
     }
     pub fn append(&mut self, t: T) {
@@ -37,16 +30,9 @@ impl <T> List<T> {
     }
 
     fn double_cap(&mut self) {
-        let mut new_vec: Vec<Option<T>> = unsafe {
-            let mut v = Vec::with_capacity(2*self.cap);
-            v.set_len(2*self.cap);
-            v
-        };
+        let mut new_vec = (0..2*self.cap).map(|_| None).collect::<Vec<_>>();
         for i in 0..self.cap {
             new_vec[i] = self.array[i].take();
-        }
-        for i in self.cap..2*self.cap {
-            new_vec[i] = None;
         }
 
         self.array = new_vec;
