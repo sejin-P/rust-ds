@@ -12,22 +12,8 @@ pub struct LinearProbeMap<K: Hash + PartialEq, V> {
 impl<K: Hash + PartialEq, V> LinearProbeMap<K, V> {
     pub fn new() -> Self {
         let m = 4;
-        let mut k_arr = unsafe {
-            let mut v = Vec::with_capacity(m);
-            v.set_len(m);
-            v
-        };
-        for i in 0..m {
-            k_arr[i] = None;
-        }
-        let mut v_arr = unsafe {
-            let mut v = Vec::with_capacity(m);
-            v.set_len(m);
-            v
-        };
-        for i in 0..m {
-            v_arr[i] = None;
-        }
+        let k_arr = (0..m).map(|_| None).collect::<Vec<_>>();
+        let v_arr = (0..m).map(|_| None).collect::<Vec<_>>();
 
         return LinearProbeMap {
             m,
