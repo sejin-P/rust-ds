@@ -17,7 +17,7 @@ impl<T> Node<T> {
     }
 
     // The 'a lifetime parameter indicates that the returned references are valid for as long as the self reference is valid.
-    pub fn preorder<>(&self) -> Vec<Rc<RefCell<T>>> {
+    pub fn preorder(&self) -> Vec<Rc<RefCell<T>>> {
         let mut li = vec![self.val.clone()];
         let mut left_li = match self.left.clone() {
             None => {vec![]}
@@ -34,6 +34,48 @@ impl<T> Node<T> {
 
         li.append(&mut left_li);
         li.append(&mut right_li);
+        li
+    }
+
+    pub fn inorder(&self) -> Vec<Rc<RefCell<T>>> {
+        let mut li = match self.left.clone() {
+            None => {vec![]}
+            Some(node) => {
+                node.borrow().inorder()
+            }
+        };
+
+        li.push(self.val.clone());
+
+        let mut right_li = match self.right.clone() {
+            None => {vec![]}
+            Some(node) => {
+                node.borrow().inorder()
+            }
+        };
+
+        li.append(&mut right_li);
+        li
+    }
+
+    pub fn postorder(&self) -> Vec<Rc<RefCell<T>>> {
+        let mut li = match self.left.clone() {
+            None => {vec![]}
+            Some(node) => {
+                node.borrow().inorder()
+            }
+        };
+
+        let mut right_li = match self.right.clone() {
+            None => {vec![]}
+            Some(node) => {
+                node.borrow().inorder()
+            }
+        };
+
+        li.append(&mut right_li);
+
+        li.push(self.val.clone());
         li
     }
 }
