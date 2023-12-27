@@ -9,6 +9,7 @@ mod stack;
 mod queue;
 mod hashmap;
 mod heap;
+mod binarytree;
 
 struct SomeStruct<T> {
     val: T,

@@ -17,6 +17,7 @@ impl<V: PartialOrd> Heap<V> {
             return
         }
 
+
         if li[i] < li[2*i+1] && li[2*i+2] < li[2*i+1] {
             li.swap(i, 2*i+1);
             Heap::down(li, 2*i+1);
