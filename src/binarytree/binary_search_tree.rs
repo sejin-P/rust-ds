@@ -32,7 +32,7 @@ impl<T: PartialOrd> BinarySearchTree<T> {
         // If val == self.val, do nothing (or handle duplicates as needed)
     }
 
-    pub fn search<'a>(&'a self, val: &T) -> Option<&'a BinarySearchTree<T>> {
+    pub fn search(&self, val: &T) -> Option<&BinarySearchTree<T>> {
         if *val < self.val {
             self.left.as_ref()?.search(val)
         } else if *val > self.val {
