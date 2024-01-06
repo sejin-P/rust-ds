@@ -59,7 +59,7 @@ impl<T: PartialOrd> BinarySearchTree<T> {
 
         if val > &self.val {
             match self.right.as_mut() {
-                None => {  }
+                None => { return }
                 Some(tree) => {
                     if &tree.val == val && tree.left.is_none() && tree.right.is_none() {
                         self.right = None;
