@@ -106,6 +106,19 @@ impl<T: PartialOrd> BinarySearchTree<T> {
             }
         }
     }
+
+    pub fn rotate_right(&mut self, mut n: Box<BinarySearchTree<T>>) -> Box<BinarySearchTree<T>> {
+        if n.left.is_none() {
+            return n;
+        }
+
+        let mut y = n.left.take().unwrap();
+        let y_right = y.right.take();
+        n.left = y_right;
+        y.right = Some(n);
+
+        return y;
+    }
 }
 
 
