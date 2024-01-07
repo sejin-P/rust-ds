@@ -98,15 +98,105 @@ impl<T: Ord + Copy> AVLTree<T> {
 
         if balance > 1 && val > node.left.as_ref().unwrap().val {
             node.left = Some(self.rotate_left(node.left.unwrap()));
-            return Some(self.rotate_right(node.left.unwrap()))
+            return Some(self.rotate_right(node))
         }
 
         if balance < -1 && val < node.right.as_ref().unwrap().val {
             node.right = Some(self.rotate_right(node.right.unwrap()));
-            return Some(self.rotate_left(node.right.unwrap()));
+            return Some(self.rotate_left(node));
         }
 
         Some(node)
+    }
+
+    fn delete_by_merging(&mut self, val: T) {
+        let root = self.root.take();
+        self.root = self.delete_rec(root, val)
+    }
+
+    fn delete_rec(&mut self, node: Option<Box<Node<T>>>, val: T) -> Option<Box<Node<T>>> {
+        let mut node = match node {
+            None => {return None}
+            Some(mut n) => {
+                if n.val > val {
+                    match n.left.as_mut() {
+                        None => {
+                            return Some(n)
+                        }
+                        Some(left) => {
+                            if left.val == val {
+                                if left.left.is_none() {
+                                    n.left = left.right.take()
+                                } else {
+                                    let l_right = left.right.take();
+                                    let mut l_left = left.left.take().unwrap();
+                                    self.attach_right(l_left.as_mut(), l_right);
+                                    n.left = Some(l_left);
+                                }
+                            } else {
+                                n.left = self.delete_rec(n.left, val);
+                            }
+                        }
+                    }
+                } else if n.val < val {
+                    match n.right.as_mut() {
+                        None => {
+                            return Some(n)
+                        }
+                        Some(right) => {
+                            if right.val == val {
+                                if right.right.is_none() {
+                                    n.right = right.left.take()
+                                } else {
+                                    let r_right = right.right.take();
+                                    let mut r_left = right.left.take().unwrap();
+                                    self.attach_right(r_left.as_mut(), r_right);
+                                    n.left = Some(r_left);
+                                }
+                            } else {
+                                n.right = self.delete_rec(n.right, val)
+                            }
+                        }
+                    }
+                }
+
+                n
+            }
+        };
+
+        node.height = 1 + max(self.height(&node.left), self.height(&node.right));
+        let balance = self.balance_factor(&node);
+
+        if balance > 1 && val > node.right.as_ref().unwrap().val {
+            return Some(self.rotate_right(node));
+        }
+
+        if balance < -1 && val < node.left.as_ref().unwrap().val {
+            return Some(self.rotate_left(node));
+        }
+
+        if balance > 1 && val < node.right.as_ref().unwrap().val {
+            node.right = Some(self.rotate_left(node.right.unwrap()));
+            return Some(self.rotate_right(node))
+        }
+
+        if balance < -1 && val < node.left.as_ref().unwrap().val {
+            node.left = Some(self.rotate_right(node.left.unwrap()));
+            return Some(self.rotate_left(node));
+        }
+
+        Some(node)
+    }
+
+    fn attach_right(&mut self, node: &mut Node<T>, right: Option<Box<Node<T>>>) {
+        match &mut node.right {
+            None => {
+                node.right = right
+            }
+            Some(r) => {
+                self.attach_right(r, right);
+            }
+        }
     }
 }
 
