@@ -10,6 +10,7 @@ mod queue;
 mod hashmap;
 mod heap;
 mod binarytree;
+mod set;
 
 struct SomeStruct<T> {
     val: T,
