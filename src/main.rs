@@ -11,6 +11,7 @@ mod hashmap;
 mod heap;
 mod binarytree;
 mod set;
+mod graph;
 
 struct SomeStruct<T> {
     val: T,
