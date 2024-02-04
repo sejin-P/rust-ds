@@ -28,13 +28,15 @@ impl<T: Copy + PartialEq> Dfs<T> {
                 for v in ve {
                     match self.visited.get(v) {
                         None => {
-                            return;
+                            self.visited.insert(v, true);
+                            self.search(v)
                         }
                         Some(visited) => {
                             if visited {
-                                return;
+                                continue
                             }
 
+                            self.visited.insert(v, true);
                             self.search(v)
                         }
                     }
