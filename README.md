@@ -32,3 +32,7 @@ Todo
    - dfs, bfs
    - Dijkstra
 10. Tim sort
+
+# Focusing on algorithm and data structure
+
+2024.03.03 - From now on, I want to only focusing on the data structures and algorithms. I'll implement algorithms and data structures in python, but in rust too if I want.
