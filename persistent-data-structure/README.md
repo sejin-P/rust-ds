@@ -15,7 +15,7 @@ Methods: Fat node, Node copying
 #### Fat node
 
 - Each node has back pointer, which points to the node which points to this node. (<=p)
-- it has version history, which contains version number, updated filed, and updated value. But its length should be constant.
+- it has version history, which contains version number, updated filed, and updated value. But its length should be constant(<2p).
 
 
 Read operation
